@@ -5,6 +5,7 @@ import pandas as pd
 import pytest
 
 from src.pandas_operation import calculate_mean_and_standard_deviation, filter_by_condition
+from src.yet_another.account_operations import BankAccount
 
 
 @pytest.fixture
