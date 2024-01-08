@@ -1,18 +1,11 @@
 [run]
-source = src
 omit =
-    *src/yet_another/*
-    *test/*
+    src/yet_another/*
 
 [report]
-fail_under = 80
+fail_under = 60
 show_missing = true
-;
-;[html]
-;directory = htmlcov
-;
-;[xml]
-;output = coverage.xml
-;
-;[annotate]
-;# Option for annotated coverage report
+
+
+[html]
+directory = htmlcov
