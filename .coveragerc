@@ -7,12 +7,12 @@ omit =
 [report]
 fail_under = 80
 show_missing = true
-
-[html]
-directory = htmlcov
-
-[xml]
-output = coverage.xml
-
-[annotate]
-# Option for annotated coverage report
+;
+;[html]
+;directory = htmlcov
+;
+;[xml]
+;output = coverage.xml
+;
+;[annotate]
+;# Option for annotated coverage report
