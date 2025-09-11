@@ -1,0 +1,42 @@
+#!/bin/bash
+set -euo pipefail
+
+# === CONFIG ===
+BITBUCKET_BASE_URL="https://bitbucket.example.com"   # change to your Bitbucket URL
+BITBUCKET_PROJECT="MYPROJECT"                        # Bamboo project key
+BITBUCKET_USER="bamboo-bot"                          # Bot/service account
+BITBUCKET_PASS="xxxxxx"                              # API token or password
+BUILD_BRANCH="${bamboo_planRepository_branchName}"   # Bamboo injects this variable
+REPOS=("repo1" "repo2" "repo3" "repo4")              # list of repo slugs
+
+# === FUNCTIONS ===
+check_pr_and_disable_merge_checks() {
+  local repo=$1
+
+  echo "Checking repo: $repo, branch: $BUILD_BRANCH -> master"
+
+  # Fetch open PRs targeting master
+  prs=$(curl -s -u "${BITBUCKET_USER}:${BITBUCKET_PASS}" \
+    "${BITBUCKET_BASE_URL}/rest/api/1.0/projects/${BITBUCKET_PROJECT}/repos/${repo}/pull-requests?state=OPEN&at=refs/heads/master")
+
+  # Match if PR source == build branch
+  pr_id=$(echo "$prs" | jq -r ".values[] | select(.fromRef.displayId==\"${BUILD_BRANCH}\" and .toRef.displayId==\"master\") | .id")
+
+  if [[ -n "$pr_id" && "$pr_id" != "null" ]]; then
+    echo "➡ Found PR $pr_id in $repo from $BUILD_BRANCH -> master"
+
+    # Disable merge checks (per-repo config)
+    curl -s -u "${BITBUCKET_USER}:${BITBUCKET_PASS}" -X PUT \
+      -H "Content-Type: application/json" \
+      "${BITBUCKET_BASE_URL}/rest/api/1.0/projects/${BITBUCKET_PROJECT}/repos/${repo}/settings/pull-requests/merge-check?enabled=false"
+
+    echo "✅ Disabled merge checks for repo: $repo"
+  else
+    echo "No matching PR found in $repo"
+  fi
+}
+
+# === MAIN ===
+for repo in "${REPOS[@]}"; do
+  check_pr_and_disable_merge_checks "$repo"
+done
