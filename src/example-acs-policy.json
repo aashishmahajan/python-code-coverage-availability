@@ -1,0 +1,43 @@
+{
+  "apiVersion": "platform.stackrox.io/v1alpha1",
+  "kind": "Policy",
+  "metadata": {
+    "name": "enforce-signed-image-and-label",
+    "namespace": "stackrox"
+  },
+  "spec": {
+    "description": "Ensures container images are signed by a specific Cosign UUID and have the label pipeline=internal-built",
+    "severity": "HIGH_SEVERITY",
+    "enforcementActions": [
+      "FAIL_BUILD",
+      "FAIL_DEPLOYMENT"
+    ],
+    "disabled": false,
+    "lifecycleStages": [
+      "BUILD",
+      "DEPLOY"
+    ],
+    "policyCategories": [
+      "Image Security",
+      "Compliance"
+    ],
+    "scope": [
+      {
+        "cluster": "*",
+        "namespace": "*"
+      }
+    ],
+    "criteria": [
+      {
+        "name": "Image Signature",
+        "rule": "image.signature.verified == true && image.signature.signer == \"cosign://<YOUR_COSIGN_UUID>\"",
+        "match": "ALL"
+      },
+      {
+        "name": "Image Label",
+        "rule": "image.labels.key == \"pipeline\" && image.labels.value == \"internal-built\"",
+        "match": "ALL"
+      }
+    ]
+  }
+}
